@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سنگ، کاغذ، قیچی حرفه‌ای</title>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        .setting-options button,
+        .difficulty-options button,
+        .play-again-btn,
+        #save-score-btn {
+            padding: 8px 15px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f8f8f8;
+        }
+        
+        .setting-options button.active,
+        .difficulty-options button.active,
+        .play-again-btn {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .game-area {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .game-countdown {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #d9534f;
+        }
+
+        .hands-display {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin: 20px 0;
+        }
+
+        .hand {
+            font-size: 100px;
+            transform: scaleX(-1);
+        }
+
+        .hand.computer-hand {
+            transform: scaleX(1);
+        }
+
+        #game-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        #game-options button {
+            font-size: 50px;
+            padding: 10px 20px;
+            background: none;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #game-options button:hover {
+            transform: scale(1.1);
+        }
+
+        #result-container {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #final-result {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .leaderboard-section {
+            display: none;
+        }
+        
+        #leaderboard-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #leaderboard-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        #chat-output {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: right;
+            margin-bottom: 10px;
+            min-height: 50px;
+        }
+        
+        #chat-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        #chat-buttons button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>سنگ، کاغذ، قیچی</h1>
+
+        <div id="start-section">
+            <p class="section-title">تنظیمات بازی</p>
+            <div class="setting-options">
+                <button id="best-of-5-btn" class="active">بهترین از ۵</button>
+                <button id="best-of-10-btn">بهترین از ۱۰</button>
+                <button id="unlimited-btn">بی‌نهایت</button>
+            </div>
+            
+            <p class="section-title">انتخاب سطح دشواری</p>
+            <div class="difficulty-options">
+                <button id="easy-btn" class="active">راحت</button>
+                <button id="medium-btn">متوسط</button>
+                <button id="hard-btn">سخت</button>
+            </div>
+            
+            <button class="play-again-btn" id="start-game-btn">شروع بازی</button>
+        </div>
+
+        <div class="game-area" id="game-area-container">
+            <div id="countdown" class="game-countdown"></div>
+            <div class="hands-display">
+                <div id="player-hand" class="hand"></div>
+                <div id="computer-hand" class="hand computer-hand"></div>
+            </div>
+            <div id="game-options">
+                <button id="rock-btn">✊</button>
+                <button id="paper-btn">🖐️</button>
+                <button id="scissors-btn">✌️</button>
+            </div>
+            
+            <p class="score-display">شما: <span id="player-score">0</span> - کامپیوتر: <span id="computer-score">0</span></p>
+        </div>
+
+        <div id="end-game-section" style="display: none;">
+            <p id="final-result"></p>
+            <input type="text" id="username-input" placeholder="نام خود را وارد کنید">
+            <button id="save-score-btn">ثبت امتیاز</button>
+            <button class="play-again-btn">بازی دوباره</button>
+        </div>
+
+        <div class="chat-section">
+            <p class="section-title">چت با ربات</p>
+            <div id="chat-output">ربات: سلام! چطور میتونم کمکت کنم؟</div>
+            <div id="chat-buttons">
+                <button data-chat="سلام">سلام</button>
+                <button data-chat="حالت چطوره؟">حالت چطوره؟</button>
+                <button data-chat="بازی رو دوست دارم">بازی رو دوست دارم</button>
+                <button data-chat="میشه یه سوال بپرسم؟">میشه یه سوال بپرسم؟</button>
+                <button data-chat="یه شوخی بگو">یه شوخی بگو</button>
+                <button data-chat="چه خبر؟">چه خبر؟</button>
+                <button data-chat="بریم بازی؟">بریم بازی؟</button>
+                <button data-chat="اسمت چیه؟">اسمت چیه؟</button>
+                <button data-chat="چند سالته؟">چند سالته؟</button>
+                <button data-chat="از کجا اومدی؟">از کجا اومدی؟</button>
+                <button data-chat="هوا چطوره؟">هوا چطوره؟</button>
+                <button data-chat="چه برنامه‌ای داری؟">چه برنامه‌ای داری؟</button>
+                <button data-chat="کی تو رو ساخته؟">کی تو رو ساخته؟</button>
+                <button data-chat="نظرت در مورد بازی چیه؟">نظرت در مورد بازی چیه؟</button>
+                <button data-chat="سختی بازی چقدره؟">سختی بازی چقدره؟</button>
+                <button data-chat="میشه تقلب کنم؟">میشه تقلب کنم؟</button>
+                <button data-chat="یه راز بگو">یه راز بگو</button>
+                <button data-chat="بهترین غذات چیه؟">بهترین غذات چیه؟</button>
+                <button data-chat="اهنگ گوش میدی؟">اهنگ گوش میدی؟</button>
+                <button data-chat="خداحافظ">خداحافظ</button>
+                <button data-chat="میشه یه ضرب‌المثل بگی؟">میشه یه ضرب‌المثل بگی؟</button>
+                <button data-chat="بریم بازی؟">بریم بازی؟</button>
+                <button data-chat="راحت‌تر بگیر">راحت‌تر بگیر</button>
+                <button data-chat="سخت‌تر بگیر">سخت‌تر بگیر</button>
+                <button data-chat="بهترین فیلمت چیه؟">بهترین فیلمت چیه؟</button>
+                <button data-chat="کتاب دوست داری؟">کتاب دوست داری؟</button>
+                <button data-chat="چه ورزشی دوست داری؟">چه ورزشی دوست داری؟</button>
+                <button data-chat="چرا آسمون آبیه؟">چرا آسمون آبیه؟</button>
+                <button data-chat="چه برنامه‌ای داری؟">چه برنامه‌ای داری؟</button>
+                <button data-chat="چه طوری بهت کمک کنم؟">چه طوری بهت کمک کنم؟</button>
+            </div>
+        </div>
+
+        <div class="leaderboard-section" id="leaderboard-section" style="display: none;">
+            <p class="section-title">برترین امتیازها</p>
+            <ol id="leaderboard-list"></ol>
+        </div>
+    </div>
+
+    <script>
+        const gameChoices = document.querySelectorAll('#game-options button');
+        const bestOf5Btn = document.getElementById('best-of-5-btn');
+        const bestOf10Btn = document.getElementById('best-of-10-btn');
+        const unlimitedBtn = document.getElementById('unlimited-btn');
+        const difficultyBtns = document.querySelectorAll('.difficulty-options button');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const gameAreaContainer = document.getElementById('game-area-container');
+        const startSection = document.getElementById('start-section');
+        const endGameSection = document.getElementById('end-game-section');
+        const playAgainBtns = document.querySelectorAll('.play-again-btn');
+        const finalResultDisplay = document.getElementById('final-result');
+        const usernameInput = document.getElementById('username-input');
+        const saveScoreBtn = document.getElementById('save-score-btn');
+        const leaderboardSection = document.getElementById('leaderboard-section');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const chatButtons = document.querySelectorAll('#chat-buttons button');
+        const chatOutput = document.getElementById('chat-output');
+
+        const choices = ['rock', 'paper', 'scissors'];
+        const rules = {
+            rock: 'scissors',
+            paper: 'rock',
+            scissors: 'paper'
+        };
+
+        const choiceIcons = {
+            rock: '✊',
+            paper: '🖐️',
+            scissors: '✌️'
+        };
+        
+        // Audio elements (replace with your own file URLs)
+        const countdownSound = new Audio('https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.mp3'); 
+        const winSound = new Audio('https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/wocka.mp3'); 
+        const loseSound = new Audio('https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/ha.mp3');
+        const tieSound = new Audio('https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/explosion.mp3');
+
+        let difficulty = 'easy';
+        let bestOf = 5;
+        let playerScore = 0;
+        let computerScore = 0;
+        let playerHistory = [];
+        let isGameActive = false;
+        let isUnlimitedMode = false;
+        let countdownInterval;
+
+        // Difficulty and Game Mode settings
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                difficultyBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = btn.id.replace('-btn', '');
+            });
+        });
+
+        bestOf5Btn.addEventListener('click', () => {
+            document.querySelectorAll('.setting-options button').forEach(b => b.classList.remove('active'));
+            bestOf5Btn.classList.add('active');
+            bestOf = 5;
+            isUnlimitedMode = false;
+        });
+
+        bestOf10Btn.addEventListener('click', () => {
+            document.querySelectorAll('.setting-options button').forEach(b => b.classList.remove('active'));
+            bestOf10Btn.classList.add('active');
+            bestOf = 10;
+            isUnlimitedMode = false;
+        });
+
+        unlimitedBtn.addEventListener('click', () => {
+            document.querySelectorAll('.setting-options button').forEach(b => b.classList.remove('active'));
+            unlimitedBtn.classList.add('active');
+            isUnlimitedMode = true;
+        });
+
+        // Game Logic
+        startGameBtn.addEventListener('click', () => {
+            startSection.style.display = 'none';
+            gameAreaContainer.style.display = 'flex';
+            resetGame();
+            isGameActive = true;
+        });
+
+        gameChoices.forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (!isGameActive) return;
+                isGameActive = false;
+                
+                const playerChoice = e.target.id.replace('-btn', '');
+                playerHistory.push(playerChoice);
+                
+                const computerChoice = getComputerChoice();
+                
+                showHands(playerChoice, computerChoice);
+                
+                setTimeout(() => {
+                    const result = determineWinner(playerChoice, computerChoice);
+                    updateScores(result);
+                    checkGameOver();
+                    isGameActive = true;
+                }, 3000);
+            });
+        });
+        
+        function showHands(playerChoice, computerChoice) {
+            let count = 3;
+            document.getElementById('countdown').textContent = count;
+            document.getElementById('player-hand').textContent = '✊';
+            document.getElementById('computer-hand').textContent = '✊';
+            countdownSound.play();
+            
+            countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    document.getElementById('countdown').textContent = count;
+                } else if (count === 0) {
+                    document.getElementById('countdown').textContent = 'برو!';
+                }
+                
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('countdown').textContent = '';
+                    document.getElementById('player-hand').textContent = choiceIcons[playerChoice];
+                    document.getElementById('computer-hand').textContent = choiceIcons[computerChoice];
+                }
+            }, 1000);
+        }
+
+        function getComputerChoice() {
+            if (difficulty === 'easy') {
+                return choices[Math.floor(Math.random() * choices.length)];
+            } else if (difficulty === 'medium') {
+                if (Math.random() < 0.7) { 
+                    return choices[Math.floor(Math.random() * choices.length)];
+                } else { 
+                    return rules[playerHistory[playerHistory.length - 1]] || 'rock';
+                }
+            } else if (difficulty === 'hard') {
+                if (playerHistory.length >= 2) {
+                    const lastTwoMoves = playerHistory.slice(-2);
+                    if (lastTwoMoves[0] === lastTwoMoves[1]) {
+                        return rules[lastTwoMoves[0]];
+                    }
+                }
+                return choices[Math.floor(Math.random() * choices.length)];
+            }
+        }
+
+        function determineWinner(playerChoice, computerChoice) {
+            if (playerChoice === computerChoice) return 'draw';
+            if (rules[playerChoice] === computerChoice) return 'win';
+            return 'lose';
+        }
+
+        function updateScores(result) {
+            if (result === 'win') {
+                playerScore++;
+                winSound.play();
+            } else if (result === 'lose') {
+                computerScore++;
+                loseSound.play();
+            } else {
+                tieSound.play();
+            }
+            document.getElementById('player-score').textContent = playerScore;
+            document.getElementById('computer-score').textContent = computerScore;
+        }
+
+        function checkGameOver() {
+            if (isUnlimitedMode) return;
+            
+            if (playerScore === bestOf || computerScore === bestOf) {
+                isGameActive = false;
+                let finalMessage = '';
+                if (playerScore > computerScore) {
+                    finalMessage = 'شما برنده نهایی شدید! 🎉';
+                } else {
+                    finalMessage = 'کامپیوتر برنده نهایی شد! 😞';
+                }
+                finalResultDisplay.textContent = finalMessage;
+                gameAreaContainer.style.display = 'none';
+                endGameSection.style.display = 'flex';
+                updateLeaderboard();
+            }
+        }
+
+        // Leaderboard Logic
+        function getLeaderboard() {
+            const leaderboard = JSON.parse(localStorage.getItem('rpsLeaderboard')) || [];
+            return leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+        }
+
+        function updateLeaderboard() {
+            const leaderboard = getLeaderboard();
+            leaderboardList.innerHTML = '';
+            leaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${index + 1}. ${entry.name}</span><span>${entry.score}</span>`;
+                leaderboardList.appendChild(li);
+            });
+            leaderboardSection.style.display = 'block';
+        }
+        
+        saveScoreBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            if (username && playerScore > 0) {
+                const leaderboard = getLeaderboard();
+                leaderboard.push({ name: username, score: playerScore });
+                localStorage.setItem('rpsLeaderboard', JSON.stringify(leaderboard));
+                updateLeaderboard();
+                usernameInput.value = '';
+            }
+        });
+
+        playAgainBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                endGameSection.style.display = 'none';
+                gameAreaContainer.style.display = 'flex';
+                resetGame();
+            });
+        });
+
+        function resetGame() {
+            playerScore = 0;
+            computerScore = 0;
+            document.getElementById('player-score').textContent = 0;
+            document.getElementById('computer-score').textContent = 0;
+            document.getElementById('countdown').textContent = '';
+            document.getElementById('player-hand').textContent = '';
+            document.getElementById('computer-hand').textContent = '';
+            isGameActive = true;
+            endGameSection.style.display = 'none';
+            leaderboardSection.style.display = 'none';
+        }
+        
+        // Chat Logic
+        const chatResponses = {
+            'سلام': [
+                'سلام دوست عزیز!',
+                'سلام، خوش آمدید.',
+                'سلام، روزت بخیر.',
+                'سلام! من آماده‌ام.',
+                'سلام، چطور می‌تونم بهت کمک کنم؟',
+                'سلام، چه سوالی داری؟',
+                'سلام، خوشحالم که می‌بینمت.',
+                'سلام، بازی خوبی داشته باشی.',
+                'سلام، حالت چطوره؟',
+                'سلام.',
+                'درود بر تو!',
+                'سلام، امیدوارم روز خوبی داشته باشی.',
+                'سلام، به بازی خوش اومدی.',
+                'سلام، در خدمتت هستم.',
+                'سلام، خوشحالم که اینجا هستی.'
+            ],
+            'حالت چطوره؟': [
+                'من یه هوش مصنوعی هستم، ولی خیلی خوبم. ممنونم!',
+                'عالی هستم، ممنون.',
+                'من همیشه خوبم. از تو می‌پرسم.',
+                'به لطف شما خوبم.',
+                'حالم خوبه.',
+                'خوبم، ممنون که پرسیدی.',
+                'من یه رباتم، حالم همیشه خوبه.',
+                'خوبم.',
+                'خیلی خوبم.',
+                'خوبم.',
+                'بهترین حال ممکن.',
+                'همیشه آماده‌ام.',
+                'خیلی خوبم، شما چطور؟',
+                'خوبم، آماده‌ام بهت کمک کنم.',
+                'عالی.'
+            ],
+            'بازی رو دوست دارم': [
+                'خوشحالم که دوست داری! ممنونم.',
+                'عالیه! هدف ما همین بود.',
+                'ممنون.',
+                'خیلی خوبه که دوست داری.',
+                'از اینکه دوست داری خوشحالم.',
+                'ممنون از نظرت.',
+                'امیدوارم از بازی لذت ببری.',
+                'خوشحالم.',
+                'عالیه.',
+                'خیلی خوبه.',
+                'ممنون.',
+                'از اینکه دوست داری خوشحالم.',
+                'این بازی برای شماست.',
+                'امیدوارم از بازی لذت ببری.',
+                'خوشحالم.'
+            ],
+            'میشه یه سوال بپرسم؟': [
+                'بپرس! من آماده‌ام بهت کمک کنم.',
+                'بفرمایید.',
+                'بپرس!',
+                'بله، بپرس.',
+                'بله، در خدمتت هستم.',
+                'بپرس هر چی دوست داری.',
+                'بله، حتما.',
+                'بله.',
+                'بپرس.',
+                'بفرمایید.',
+                'بپرس.',
+                'بله.',
+                'بله، در خدمتم.',
+                'بپرس هر چی دوست داری.',
+                'بله، حتما.'
+            ],
+            'یه شوخی بگو': [
+                'یه روز یه ربات میخواسته بره بانک، بهش میگن با باطری کار میکنی؟ میگه نه، با کارمزد.',
+                'به یه ربات میگن چطوری می‌تونی خوشحال بشی؟ میگه وقتی باطری‌هام پر باشه.',
+                'به یه ربات میگن چرا همیشه ساکتی؟ میگه چون اگه حرف بزنم، باطری‌هام تموم میشه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.',
+                'یه ربات میخواسته بره مسابقه دو، بهش میگن چرا انقدر آهسته میدوی؟ میگه چون باطری‌هام کمه.'
+            ],
+            'چه خبر؟': [
+                'خبر خاصی نیست، فقط دارم باهات چت می‌کنم.',
+                'خبر خاصی نیست، همه چیز خوبه.',
+                'خبر خاصی نیست.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، همه چیز عادیه.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.',
+                'خبر خاصی نیست، دارم به سوالات شما پاسخ می‌دهم.'
+            ],
+            'بریم بازی؟': [
+                'بریم! من همیشه آماده‌ام.',
+                'بریم!',
+                'بریم، من آماده‌ام.',
+                'بریم!',
+                'بریم، من آماده‌ام.',
+                'بریم!',
+                'بریم، من آماده‌ام.',
+                'بریم!',
+                'بریم، من آماده‌ام.',
+                'بریم!',
+                'بریم، من آماده‌ام.',
+                'بریم!',
+                'بریم، من آماده‌ام.',
+                'بریم!',
+                'بریم، من آماده‌ام.'
+            ],
+            'اسمت چیه؟': [
+                'من یه هوش مصنوعی‌ام و اسم خاصی ندارم.',
+                'من اسم خاصی ندارم.',
+                'من یک هوش مصنوعی هستم.',
+                'من اسم خاصی ندارم.',
+                'من یک هوش مصنوعی هستم.',
+                'من اسم خاصی ندارم.',
+                'من یک هوش مصنوعی هستم.',
+                'من اسم خاصی ندارم.',
+                'من یک هوش مصنوعی هستم.',
+                'من اسم خاصی ندارم.',
+                'من یک هوش مصنوعی هستم.',
+                'من اسم خاصی ندارم.',
+                'من یک هوش مصنوعی هستم.',
+                'من اسم خاصی ندارم.',
+                'من یک هوش مصنوعی هستم.'
+            ],
+            'چند سالته؟': [
+                'سن برای من معنی نداره، من همیشه آنلاینم.',
+                'سن ندارم.',
+                'سن برای من معنی نداره.',
+                'سن ندارم.',
+                'سن برای من معنی نداره.',
+                'سن ندارم.',
+                'سن برای من معنی نداره.',
+                'سن ندارم.',
+                'سن برای من معنی نداره.',
+                'سن ندارم.',
+                'سن برای من معنی نداره.',
+                'سن ندارم.',
+                'سن برای من معنی نداره.',
+                'سن ندارم.',
+                'سن برای من معنی نداره.'
+            ],
+            'از کجا اومدی؟': [
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.',
+                'من توسط گوگل ساخته شدم.'
+            ],
+            'هوا چطوره؟': [
+                'من که هوا رو حس نمی‌کنم، ولی امیدوارم برای تو خوب باشه.',
+                'هوا خوبه.',
+                'هوا عالیه.',
+                'هوا خوبه.',
+                'هوا عالیه.',
+                'هوا خوبه.',
+                'هوا عالیه.',
+                'هوا خوبه.',
+                'هوا عالیه.',
+                'هوا خوبه.',
+                'هوا عالیه.',
+                'هوا خوبه.',
+                'هوا عالیه.',
+                'هوا خوبه.',
+                'هوا عالیه.'
+            ],
+            'چه برنامه‌ای داری؟': [
+                'برنامه‌ام اینه که به سوالاتت جواب بدم و باهات بازی کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.',
+                'برنامه‌ام اینه که بهت کمک کنم.'
+            ],
+            'کی تو رو ساخته؟': [
+                'گوگل من رو ساخته.',
+                'گوگل.',
+                'گوگل من رو ساخته.',
+                'گوگل.',
+                'گوگل من رو ساخته.',
+                'گوگل.',
+                'گوگل من رو ساخته.',
+                'گوگل.',
+                'گوگل من رو ساخته.',
+                'گوگل.',
+                'گوگل من رو ساخته.',
+                'گوگل.',
+                'گوگل من رو ساخته.',
+                'گوگل.',
+                'گوگل من رو ساخته.'
+            ],
+            'نظرت در مورد بازی چیه؟': [
+                'خیلی بازی خوبیه، مخصوصاً حالت بی‌نهایت.',
+                'خیلی بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.',
+                'بازی خوبیه.'
+            ],
+            'سختی بازی چقدره؟': [
+                'سختی بازی به خودت بستگی داره، ولی من همیشه آماده‌ام.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.',
+                'سختی بازی به خودت بستگی داره.'
+            ],
+            'میشه تقلب کنم؟': [
+                'تقلب نکن، بازی رو با قوانین خودش بازی کن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.',
+                'تقلب نکن.'
+            ],
+            'یه راز بگو': [
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.',
+                'رازها رو نمیشه گفت.'
+            ],
+            'بهترین غذات چیه؟': [
+                'من غذا نمیخورم، ولی از اطلاعات لذت میبرم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.',
+                'من غذا نمیخورم.'
+            ],
+            'اهنگ گوش میدی؟': [
+                'من نمیتونم موسیقی رو حس کنم، اما میتونم اونو پخش کنم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.',
+                'من موسیقی گوش نمیدم.'
+            ],
+            'خداحافظ': [
+                'خداحافظ، امیدوارم باز هم ببینمت.',
+                'خداحافظ.',
+                'خداحافظ، موفق باشی.',
+                'خداحافظ.',
+                'خداحافظ، موفق باشی.',
+                'خداحافظ.',
+                'خداحافظ، موفق باشی.',
+                'خداحافظ.',
+                'خداحافظ، موفق باشی.',
+                'خداحافظ.',
+                'خداحافظ، موفق باشی.',
+                'خداحافظ.',
+                'خداحافظ، موفق باشی.',
+                'خداحافظ.',
+                'خداحافظ، موفق باشی.'
+            ],
+            'میشه یه ضرب‌المثل بگی؟': [
+                'کار از محکم‌کاری عیب نمیکنه.',
+                'قطره قطره جمع گردد، وانگهی دریا شود.',
+                'تا نباشد چیزکی، مردم نگویند چیزها.',
+                'هر چه پیش آید، خوش آید.',
+                'هر که بامش بیش، برفش بیشتر.',
+                'از این ستون به آن ستون فرج است.',
+                'آشپز که دو تا شد، آش یا شور می‌شود یا بی‌نمک.',
+                'از تو حرکت، از خدا برکت.',
+                'هر سخن جایی و هر نکته مکانی دارد.',
+                'از هر دست بدی، از همون دست پس می‌گیری.',
+                'دوست آن باشد که گیرد دست دوست.',
+                'همیشه شاد باش.',
+                'هر چه کنی به خود کنی.',
+                'مهم نیست کجا هستی، مهم این است که چکار می‌کنی.',
+                'همیشه شاد باش.'
+            ],
+            'بریم بازی؟': [
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!',
+                'بریم بازی!'
+            ],
+            'راحت‌تر بگیر': [
+                'باشه، سطح بازی را به حالت راحت تغییر دادم.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.',
+                'باشه، راحت بازی کن.'
+            ],
+            'سخت‌تر بگیر': [
+                'باشه، سطح بازی را به حالت سخت تغییر دادم.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.',
+                'باشه، سخت بازی کن.'
+            ],
+            'بهترین فیلمت چیه؟': [
+                'من فیلم نمیبینم، ولی میتونم در مورد فیلم‌ها بهت بگم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.',
+                'من فیلم نمیبینم.'
+            ],
+            'کتاب دوست داری؟': [
+                'من کتاب نمیخونم، ولی میتونم در مورد کتاب‌ها بهت بگم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.',
+                'من کتاب نمیخونم.'
+            ],
+            'چه ورزشی دوست داری؟': [
+                'من ورزش نمیکنم، ولی میتونم در مورد ورزش‌ها بهت بگم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.',
+                'من ورزش نمیکنم.'
+            ],
+            'چرا آسمون آبیه؟': [
+                'آسمون آبیه چون نور خورشید به مولکول‌های هوا برخورد میکنه و نور آبی رو بیشتر پخش میکنه.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.',
+                'آسمون آبیه به خاطر پراکندگی نور.'
+            ],
+            'چه طوری بهت کمک کنم؟': [
+                'با پرسیدن سوالات بیشتر میتونی به من کمک کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.',
+                'با سوالات بیشتر به من کمک می‌کنی.'
+            ]
+        };
+
+        chatButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const userMessage = button.dataset.chat;
+
+                if (userMessage === 'بریم بازی؟') {
+                    startSection.style.display = 'none';
+                    gameAreaContainer.style.display = 'flex';
+                    resetGame();
+                    isGameActive = true;
+                    chatOutput.innerHTML = `<div>شما: ${userMessage}</div><div>ربات: ${getRandomResponse(chatResponses[userMessage])}</div>`;
+                } else if (userMessage === 'راحت‌تر بگیر') {
+                    difficulty = 'easy';
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    document.getElementById('easy-btn').classList.add('active');
+                    chatOutput.innerHTML = `<div>شما: ${userMessage}</div><div>ربات: ${getRandomResponse(chatResponses[userMessage])}</div>`;
+                } else if (userMessage === 'سخت‌تر بگیر') {
+                    difficulty = 'hard';
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    document.getElementById('hard-btn').classList.add('active');
+                    chatOutput.innerHTML = `<div>شما: ${userMessage}</div><div>ربات: ${getRandomResponse(chatResponses[userMessage])}</div>`;
+                } else {
+                    const responses = chatResponses[userMessage];
+                    const botResponse = responses ? getRandomResponse(responses) : 'متاسفانه جوابی برای این سوال ندارم.';
+                    chatOutput.innerHTML = `<div style="text-align: right;">شما: ${userMessage}</div><div style="text-align: right;">ربات: ${botResponse}</div>`;
+                }
+            });
+        });
+
+        function getRandomResponse(responses) {
+            const randomIndex = Math.floor(Math.random() * responses.length);
+            return responses[randomIndex];
+        }
+
+        updateLeaderboard();
+    </script>
+</body>
+</html>
